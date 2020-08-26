@@ -67,6 +67,15 @@ cmake ..
 您可以在 examples 下选择您需要的工程编译，具体说明请到对应工程查看。
 > 不过，无论编译哪个 examples 您都需要将 ` 3.腾讯云平台准备`中生产的三元组信息填写到 [HAL_Device_freertos.c](./qcloud_iot_c_sdk/platform/HAL_Device_freertos.c)
 
+```
+/* Product Id */
+static char sg_product_id[MAX_SIZE_OF_PRODUCT_ID + 1]    = "PRODUCT_ID";
+/* Device Name */
+static char sg_device_name[MAX_SIZE_OF_DEVICE_NAME + 1]  = "YOUR_DEV_NAME";
+/* Device Secret */
+static char sg_device_secret[MAX_SIZE_OF_DEVICE_SECRET + 1] = "YOUR_IOT_PSK";
+```
+
 
 
 
