@@ -145,11 +145,9 @@ void led_task(void* par)
 
 void board_init(void)
 {
-#ifdef CONFIG_IDF_TARGET_ESP32S2
     led_init();
     led_set(100,100,100);
     xTaskCreate(led_task, "led_task", 2048, NULL, 4, NULL);
-#endif
 }
 
 
