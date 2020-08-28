@@ -45,11 +45,11 @@ extern "C" {
  */
 esp_err_t factory_restore_init(void);
 
-int nvs_kv_del(const char *key);
+esp_err_t qcloud_nvs_kv_del(const char *key);
 
-int nvs_kv_get(const char *key, void *val, int *buffer_len);
+esp_err_t qcloud_nvs_kv_get(const char *key, void *val, int *buffer_len);
 
-int nvs_kv_set(const char *key, const void *val, int len, int sync);
+esp_err_t qcloud_nvs_kv_set(const char *key, const void *val, int len, int sync);
 
 #ifdef __cplusplus
 }

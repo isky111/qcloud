@@ -73,13 +73,13 @@ esp_err_t HAL_Kv_Init(void)
     return ret;
 }
 
-int nvs_kv_del(const char *key)
+esp_err_t qcloud_nvs_kv_del(const char *key)
 {
     nvs_handle handle;
     esp_err_t ret;
 
     if (key == NULL) {
-        ESP_LOGE(TAG, "nvs_kv_del Null key");
+        ESP_LOGE(TAG, "qcloud_nvs_kv_del Null key");
         return ESP_FAIL;
     }
 
@@ -107,13 +107,13 @@ int nvs_kv_del(const char *key)
     return ret;
 }
 
-int nvs_kv_get(const char *key, void *val, int *buffer_len)
+esp_err_t qcloud_nvs_kv_get(const char *key, void *val, int *buffer_len)
 {
     nvs_handle handle;
     esp_err_t ret;
 
     if (key == NULL || val == NULL || buffer_len == NULL) {
-        ESP_LOGE(TAG, "nvs_kv_get Null params");
+        ESP_LOGE(TAG, "qcloud_nvs_kv_get Null params");
         return ESP_FAIL;
     }
 
@@ -139,13 +139,13 @@ int nvs_kv_get(const char *key, void *val, int *buffer_len)
     return ret;
 }
 
-int nvs_kv_set(const char *key, const void *val, int len, int sync)
+esp_err_t qcloud_nvs_kv_set(const char *key, const void *val, int len, int sync)
 {
     nvs_handle handle;
     esp_err_t ret;
 
     if (key == NULL || val == NULL || len <= 0) {
-        ESP_LOGE(TAG, "nvs_kv_set NULL params");
+        ESP_LOGE(TAG, "qcloud_nvs_kv_set NULL params");
         return ESP_FAIL;
     }
 
@@ -180,24 +180,24 @@ static esp_err_t factory_restore_handle(void)
 
     /**< If the device restarts within the instruction time, the event_mdoe value will be incremented by one */
     int length = sizeof(int);
-    ret = nvs_kv_get(FACTORY_QUICK_REBOOT_TIMES, &quick_reboot_times, &length);
+    ret = qcloud_nvs_kv_get(FACTORY_QUICK_REBOOT_TIMES, &quick_reboot_times, &length);
 
     quick_reboot_times++;
 
-    ret = nvs_kv_set(FACTORY_QUICK_REBOOT_TIMES, &quick_reboot_times, sizeof(int), 0);
+    ret = qcloud_nvs_kv_set(FACTORY_QUICK_REBOOT_TIMES, &quick_reboot_times, sizeof(int), 0);
 
     if (quick_reboot_times >= FACTORY_QUICK_REBOOT_MAX_TIMES) {
         char rst = 0x01;
 
         /*  since we cannot report reset status to cloud in this stage, just set the reset flag.
             when connects to cloud, awss will do the reset report. */
-        ret = nvs_kv_set(qcloud_KV_RST, &rst, sizeof(rst), 0);  
-        ret = nvs_kv_del(FACTORY_QUICK_REBOOT_TIMES);
+        ret = qcloud_nvs_kv_set(qcloud_KV_RST, &rst, sizeof(rst), 0);  
+        ret = qcloud_nvs_kv_del(FACTORY_QUICK_REBOOT_TIMES);
 
         ESP_LOGW(TAG, "factory restore");
-          //擦除配网信息
-         nvs_kv_del(STA_SSID_KEY); 
-         nvs_kv_del(STA_PASSWORD_KEY);
+         
+         qcloud_nvs_kv_del(STA_SSID_KEY); 
+         qcloud_nvs_kv_del(STA_PASSWORD_KEY);
     } else {
         ESP_LOGI(TAG, "quick reboot times %d, don't need to restore", quick_reboot_times);
     }
@@ -216,7 +216,7 @@ static void factory_restore_timer_handler(void *timer)
     }
 
     /* erase reboot times record */
-    nvs_kv_del(FACTORY_QUICK_REBOOT_TIMES);
+    qcloud_nvs_kv_del(FACTORY_QUICK_REBOOT_TIMES);
 
     ESP_LOGI(TAG, "Quick reboot timeout, clear reboot times");
 }
@@ -225,7 +225,7 @@ esp_err_t factory_restore_init(void)
 {
 #ifdef CONFIG_IDF_TARGET_ESP32
     if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_UNDEFINED) {
-        nvs_kv_del(FACTORY_QUICK_REBOOT_TIMES);
+        qcloud_nvs_kv_del(FACTORY_QUICK_REBOOT_TIMES);
         return ESP_OK;
     }
 #endif

@@ -30,6 +30,7 @@
 #include "qcloud_wifi_config.h"
 #include "board_ops.h"
 #include "factory_restore.h"
+#include "led_5050.h"
 
 #define STA_SSID_KEY             "stassid"
 #define STA_PASSWORD_KEY         "pswd"
@@ -83,9 +84,9 @@ static void wifi_connection(void)
     int password_len = 64;
         if (provisioned) {
         memset(&wifi_config, 0, sizeof(wifi_config_t));
-        int ret = nvs_kv_get(STA_SSID_KEY, wifi_config.sta.ssid, &ssid_len);
+        int ret = qcloud_nvs_kv_get(STA_SSID_KEY, wifi_config.sta.ssid, &ssid_len);
 
-        ret = nvs_kv_get(STA_PASSWORD_KEY, wifi_config.sta.password, &password_len);
+        ret = qcloud_nvs_kv_get(STA_PASSWORD_KEY, wifi_config.sta.password, &password_len);
     }
     Log_i("Setting WiFi configuration SSID:%s,  PSW:%s", wifi_config.sta.ssid, wifi_config.sta.password);
 
@@ -181,7 +182,7 @@ static bool app_prov_is_provisioned(bool * provisioned)
     int len = 32;
     uint8_t ssid[32] = { 0 };
 
-    int ret = nvs_kv_get(STA_SSID_KEY, ssid, &len);
+    int ret = qcloud_nvs_kv_get(STA_SSID_KEY, ssid, &len);
     ESP_LOGI("main", "ssid : %s",ssid );
 
     if (strlen((const char*) ssid)) {
@@ -249,6 +250,12 @@ void app_main()
     ESP_ERROR_CHECK(nvs_flash_init());
     
     ESP_ERROR_CHECK(factory_restore_init());
+    led5050_init();
+    led5050_set_hue(100);
+    led5050_set_lightness(10);
+    led5050_set_saturation(100);
+    led5050_set_status(true);
+
 
     //init log level
     IOT_Log_Set_Level(eLOG_DEBUG);
