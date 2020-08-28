@@ -30,6 +30,7 @@
 #include "qcloud_wifi_config.h"
 #include "factory_restore.h"
 #include "light.h"
+#include "esp_qcloud_prov.h"
 
 #define STA_SSID_KEY             "stassid"
 #define STA_PASSWORD_KEY         "pswd"
@@ -243,7 +244,7 @@ void smart_light_task(void* parm)
     vTaskDelete(NULL);
 }
 
-
+#if 0
 void app_main()
 {
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -258,4 +259,40 @@ void app_main()
     xTaskCreate((void (*)(void *))smart_light_task, "smart_light_task", 3072, NULL, 4, NULL);
 
 }
+#endif
+
+void app_main()
+{
+    bool provisioned = false;
+    IOT_Log_Set_Level(eLOG_DEBUG);
+    ESP_ERROR_CHECK( nvs_flash_init() );
+
+    ESP_ERROR_CHECK( factory_restore_init() );
+
+    ESP_ERROR_CHECK( light_driver_init() );
+
+    ESP_ERROR_CHECK( light_set_status(true, 300, 100, 100) );
+
+    ESP_ERROR_CHECK( esp_qcloud_wifi_init() );
+
+#if 0
+     // ESP_ERROR_CHECK( app_prov_is_provisioned(&provisioned) );
+    if (!provisioned) {
+        //todo 
+    }
+#else
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = TEST_WIFI_SSID,
+            .password = TEST_WIFI_PASSWORD,
+        },
+    };
+#endif
+
+    ESP_ERROR_CHECK(esp_qcloud_wifi_start(&wifi_config));
+    xTaskCreate(setup_sntp, "setup_sntp", 8196, NULL, 4, NULL); 
+    smart_light_demo();
+
+}
+
 
