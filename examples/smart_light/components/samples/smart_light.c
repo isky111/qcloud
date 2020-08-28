@@ -24,7 +24,6 @@
 #include "qcloud_iot_import.h"
 #include "lite-utils.h"
 #include "utils_timer.h"
-#include "board_ops.h"
 #include "smart_light.h"
 #include "qcloud_iot_ota_esp.h"
 #include "data_template_client_json.h"
@@ -33,6 +32,8 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+#include "light.h"
 
 #define MQTT_TIMEOUT_VALUE_MS (10 * 1000)
 
@@ -503,12 +504,12 @@ static void deal_down_stream_user_logic(void *client, ProductDataDefine *light)
     if (light->m_light_switch)
     {
         HAL_Printf(" led on %d %d %d", light->m_hue, light->m_saturation, light->m_lightness);
-        led_on(light->m_hue, light->m_saturation, light->m_lightness);
+        light_set_status(true, light->m_hue, light->m_saturation, light->m_lightness);
     }
     else
     {
         HAL_Printf("led off");
-        led_off();
+        light_set_status(false, light->m_hue, light->m_saturation, light->m_lightness);
     }
 
 #ifdef EVENT_POST_ENABLED

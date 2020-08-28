@@ -28,9 +28,8 @@
 #include "qcloud_iot_export.h"
 #include "smart_light.h"
 #include "qcloud_wifi_config.h"
-#include "board_ops.h"
 #include "factory_restore.h"
-#include "led_5050.h"
+#include "light.h"
 
 #define STA_SSID_KEY             "stassid"
 #define STA_PASSWORD_KEY         "pswd"
@@ -248,19 +247,13 @@ void smart_light_task(void* parm)
 void app_main()
 {
     ESP_ERROR_CHECK(nvs_flash_init());
-    
     ESP_ERROR_CHECK(factory_restore_init());
-    led5050_init();
-    led5050_set_hue(100);
-    led5050_set_lightness(10);
-    led5050_set_saturation(100);
-    led5050_set_status(true);
 
+    ESP_ERROR_CHECK(light_driver_init());
+    light_set_status(true, 300, 100, 100);
 
     //init log level
     IOT_Log_Set_Level(eLOG_DEBUG);
-             
-    board_init();
 
     xTaskCreate((void (*)(void *))smart_light_task, "smart_light_task", 3072, NULL, 4, NULL);
 

@@ -16,18 +16,17 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include "board_ops.h"
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "driver/rmt.h"
 #include "led_strip.h"
 
-#define RMT_TX_CHANNEL RMT_CHANNEL_0 
+#define RMT_TX_CHANNEL RMT_CHANNEL_0
 #define CONFIG_EXAMPLE_RMT_TX_GPIO 18
 #define CONFIG_EXAMPLE_STRIP_LED_NUMBER 24
 
-led_strip_t *strip;
-extern bool wifi_connected;
+static led_strip_t *strip;
+static const char *TAG = "ledWS2812";
 
 static void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, uint32_t *g, uint32_t *b)
 {
@@ -41,7 +40,8 @@ static void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, u
     // RGB adjustment amount by hue
     uint32_t rgb_adj = (rgb_max - rgb_min) * diff / 60;
 
-    switch (i) {
+    switch (i)
+    {
     case 0:
         *r = rgb_max;
         *g = rgb_min + rgb_adj;
@@ -75,32 +75,7 @@ static void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, u
     }
 }
 
-void led_set(uint32_t h, uint32_t s, uint32_t v)
-{
-    uint32_t red = 0;
-    uint32_t green = 0;
-    uint32_t blue = 0;
-    led_strip_hsv2rgb(h, s, v, &red, &green, &blue);
-
-    for (int i = 0; i < 3; i++) {
-        for (int j = i; j < CONFIG_EXAMPLE_STRIP_LED_NUMBER; j += 3) {       
-                ESP_ERROR_CHECK(strip->set_pixel(strip, j, red, green, blue));
-            }
-            ESP_ERROR_CHECK(strip->refresh(strip, 10));
-    }
-}
-
-void led_on(uint32_t h, uint32_t s, uint32_t v)
-{
-    led_set(h, s, v);
-}
-
-void led_off(void)
-{
-    ESP_ERROR_CHECK(strip->clear(strip, 10));
-}
-
-static void led_init(void)
+void ledws2812_init(void)
 {
     rmt_config_t config = RMT_DEFAULT_CONFIG_TX(CONFIG_EXAMPLE_RMT_TX_GPIO, RMT_TX_CHANNEL);
     // set counter clock to 40MHz
@@ -114,40 +89,34 @@ static void led_init(void)
     strip = led_strip_new_rmt_ws2812(&strip_config);
 }
 
-void led_task(void* par)
+esp_err_t ledws2812_deinit(void)
 {
-    uint32_t red = 255;
-    uint32_t green = 0;
-    uint32_t blue = 255;
-    uint16_t hue = 0;
-    uint16_t saturation = 0;
-    uint16_t start_rgb = 0;
-    uint16_t lightness = 0;
+	if (strip == NULL) {
+		ESP_LOGE(TAG, "not found ws2812 ");
+		return ESP_FAIL;
+	}
+	return (esp_err_t)(strip->del) ;
+}
 
-    while (!wifi_connected) {
+void ledws2812_set_status(bool value, uint16_t hue, uint16_t saturation, uint16_t lightness)
+{
+	ESP_LOGI(TAG, "ledws2812_set_status : %s", value == true ? "true" : "false");
+    if (value == true) {
+        uint32_t red = 0;
+        uint32_t green = 0;
+        uint32_t blue = 0;
+        led_strip_hsv2rgb(hue, saturation, lightness, &red, &green, &blue);
+
         for (int i = 0; i < 3; i++) {
-            for (int j = i; j < CONFIG_EXAMPLE_STRIP_LED_NUMBER; j += 3) {       
-                // Build RGB values
-                hue = j * 360 / CONFIG_EXAMPLE_STRIP_LED_NUMBER + start_rgb;
-                led_strip_hsv2rgb(hue, 100, 10, &red, &green, &blue);
-                // Write RGB values to strip driver
+            for (int j = i; j < CONFIG_EXAMPLE_STRIP_LED_NUMBER; j += 3) {
                 ESP_ERROR_CHECK(strip->set_pixel(strip, j, red, green, blue));
             }
-            // Flush RGB values to LEDs
             ESP_ERROR_CHECK(strip->refresh(strip, 10));
-            vTaskDelay(pdMS_TO_TICKS(10));
         }
-        start_rgb += 1;
-     }
-     led_off();
-     vTaskDelete(NULL);
+    } else {
+        ESP_ERROR_CHECK(strip->clear(strip, 10));
+    }
 }
 
-void board_init(void)
-{
-    led_init();
-    led_set(100,100,100);
-    xTaskCreate(led_task, "led_task", 2048, NULL, 4, NULL);
-}
 
 

@@ -32,7 +32,6 @@
 
 #include "qcloud_wifi_config.h"
 #include "wifi_config_internal.h"
-#include "board_ops.h"
 #include "factory_restore.h"
 #include "esp_err.h"
 #include "esp_log.h"

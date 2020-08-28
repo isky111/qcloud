@@ -27,8 +27,6 @@
 #include "soc/ledc_periph.h"
 #include "esp_log.h"
 
-#define SOC_LEDC_SUPPORT_HS_MODE
-
 typedef struct rgb {
     uint8_t r;  // 0-100 %
     uint8_t g;  // 0-100 %
@@ -53,9 +51,6 @@ typedef struct hsp {
 #define PWM_DEPTH (1023)
 #define PWM_TARGET_DUTY 8192
 
-static hsp_t s_hsb_val;
-static uint16_t s_brightness;
-static bool s_on = false;
 static const char *TAG = "led5050";
 
 static bool led5050_set_hsb2rgb(uint16_t h, uint16_t s, uint16_t v, rgb_t *rgb)
@@ -137,11 +132,6 @@ static bool led5050_set_aim_hsv(uint16_t h, uint16_t s, uint16_t v)
     return true;
 }
 
-static void led5050_update()
-{
-    led5050_set_aim_hsv(s_hsb_val.h, s_hsb_val.s, s_hsb_val.b);
-}
-
 void led5050_init(void)
 {
    // enable ledc module
@@ -196,55 +186,15 @@ void led5050_deinit(void)
     ledc_stop(0, LEDC_CHANNEL_2, 0);
 }
 
-int led5050_set_status(bool value)
+int led5050_set_status(bool value, uint16_t hue, uint16_t saturation, uint16_t lightness)
 {
     ESP_LOGI(TAG, "led5050_set_status : %s", value == true ? "true" : "false");
 
     if (value == true) {
-        s_hsb_val.b = s_brightness;
-        s_on = true;
+        return (led5050_set_aim_hsv(hue, saturation, lightness));
     } else {
-        s_brightness = s_hsb_val.b;
-        s_hsb_val.b = 0;
-        s_on = false;
+        return (led5050_set_aim_hsv(0, 0, 0));
     }
-    led5050_update();
-
-    return 0;
-}
-
-int led5050_set_saturation(int value)
-{
-    ESP_LOGI(TAG, "led5050_set_saturation : %d", value);
-
-    s_hsb_val.s = value;
-    if (true == s_on)
-        led5050_update();
-
-    return 0;
-}
-
-int led5050_set_hue(int value)
-{
-    ESP_LOGI(TAG, "led5050_set_hue : %d", value);
-
-    s_hsb_val.h = value;
-    if (true == s_on)
-        led5050_update();
-
-    return 0;
-}
-
-int led5050_set_lightness(int value)
-{
-    ESP_LOGI(TAG, "led5050_set_brightness : %d", value);
-
-    s_hsb_val.b = value;
-    s_brightness = s_hsb_val.b; 
-    if (true == s_on)
-        led5050_update();
-
-    return 0;
 }
 
 

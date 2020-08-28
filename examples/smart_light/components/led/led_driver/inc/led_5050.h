@@ -46,44 +46,12 @@ void led5050_deinit(void);
 
 /**
  * @brief turn on/off the led5050
- *
+ *        If value is true, the parameter will be invalid
  * @param value The "On" value
  *
  * @return none
  */
-int led5050_set_status(bool value);
+int led5050_set_status(bool value, uint16_t hue, uint16_t saturation, uint16_t lightness);
 
-/**
- * @brief set the saturation of the led5050
- *
- * @param value The Saturation value
- *
- * @return 
- *     - 0 : OK
- *     - others : fail
- */
-int led5050_set_saturation(int value);
 
-/**
- * @brief set the hue of the led5050
- *
- * @param value The Hue value
- *
- * @return 
- *     - 0 : OK
- *     - others : fail
- */
-int led5050_set_hue(int value);
-
-/**
- * @brief set the lightness of the led5050
- *
- * @param value The Brightness value
- *
- * @return 
- *     - 0 : OK
- *     - others : fail
- */
-int led5050_set_lightness(int value);
-
-#endif /* _LED_5050_H_ */
+#endif
