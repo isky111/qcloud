@@ -48,6 +48,8 @@ esp_err_t esp_qcloud_prov_softap_start(const char *ssid, const char *password, c
 
 esp_err_t esp_qcloud_prov_wait(wifi_config_t *sta_cfg, char *token, TickType_t ticks_wait);
 
+esp_err_t esp_qcloud_send_token(void);
+
 esp_err_t esp_qcloud_prov_softap_stop();
 
 #endif

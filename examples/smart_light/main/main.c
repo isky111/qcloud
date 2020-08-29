@@ -282,7 +282,8 @@ void app_main()
     ESP_ERROR_CHECK( esp_qcloud_prov_is_provisioned(&provisioned, &wifi_config) );
     if (!provisioned) {
         esp_qcloud_prov_softap_start("qcloud_123", NULL, NULL);
-        ESP_ERROR_CHECK(esp_qcloud_prov_wait(&wifi_config, NULL, portMAX_DELAY));
+        esp_qcloud_prov_wait(&wifi_config, NULL, portMAX_DELAY);
+        esp_qcloud_send_token();
     }
 #else
     wifi_config_t wifi_config = {
@@ -294,6 +295,7 @@ void app_main()
 #endif
     ESP_ERROR_CHECK(esp_qcloud_wifi_start(&wifi_config));
     xTaskCreate(setup_sntp, "setup_sntp", 8196, NULL, 4, NULL); 
+    //mqtt_send_token();
     smart_light_demo();
 
 }
