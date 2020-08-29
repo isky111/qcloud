@@ -264,7 +264,9 @@ void app_main()
 void app_main()
 {
     bool provisioned = false;
+
     IOT_Log_Set_Level(eLOG_DEBUG);
+
     ESP_ERROR_CHECK( nvs_flash_init() );
 
     ESP_ERROR_CHECK( factory_restore_init() );
@@ -275,10 +277,12 @@ void app_main()
 
     ESP_ERROR_CHECK( esp_qcloud_wifi_init() );
 
-#if 0
-     // ESP_ERROR_CHECK( app_prov_is_provisioned(&provisioned) );
+#if 1
+    wifi_config_t wifi_config = { 0 };
+    ESP_ERROR_CHECK( esp_qcloud_prov_is_provisioned(&provisioned, &wifi_config) );
     if (!provisioned) {
-        //todo 
+        esp_qcloud_prov_softap_start("qcloud_123", NULL, NULL);
+        ESP_ERROR_CHECK(esp_qcloud_prov_wait(&wifi_config, NULL, portMAX_DELAY));
     }
 #else
     wifi_config_t wifi_config = {
@@ -288,7 +292,6 @@ void app_main()
         },
     };
 #endif
-
     ESP_ERROR_CHECK(esp_qcloud_wifi_start(&wifi_config));
     xTaskCreate(setup_sntp, "setup_sntp", 8196, NULL, 4, NULL); 
     smart_light_demo();

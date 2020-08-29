@@ -38,10 +38,16 @@ esp_err_t esp_qcloud_wifi_init(void);
 
 esp_err_t esp_qcloud_wifi_start(wifi_config_t *conf);
 
-esp_err_t esp_qcloud_prov_is_provisioned(bool *provisioned);
+esp_err_t esp_qcloud_prov_is_provisioned(bool *provisioned, wifi_config_t *sta_cfg);
 
 esp_err_t esp_qcloud_get_wifi_config(wifi_config_t *conf);
 
 esp_err_t esp_qcloud_wifi_start(wifi_config_t *conf);
+
+esp_err_t esp_qcloud_prov_softap_start(const char *ssid, const char *password, const char *pop);
+
+esp_err_t esp_qcloud_prov_wait(wifi_config_t *sta_cfg, char *token, TickType_t ticks_wait);
+
+esp_err_t esp_qcloud_prov_softap_stop();
 
 #endif

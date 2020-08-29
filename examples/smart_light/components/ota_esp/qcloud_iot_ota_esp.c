@@ -32,6 +32,7 @@
 #include "qcloud_iot_ota_esp.h"
 #include "qcloud_iot_import.h"
 #include "utils_param_check.h"
+#include "qcloud_iot_import.h"
 
 #ifdef CONFIG_QCLOUD_OTA_ESP_ENABLED
 

@@ -42,9 +42,6 @@
 
 #define NVS_PARTITION_NAME  "nvs"
 #define NVS_KV              "iotkit-kv"
-#define STA_SSID_KEY             "stassid"
-#define STA_PASSWORD_KEY         "pswd"
-
 
 static const char *TAG = "factory_rst";
 
@@ -196,8 +193,8 @@ static esp_err_t factory_restore_handle(void)
 
         ESP_LOGW(TAG, "factory restore");
          
-         qcloud_nvs_kv_del(STA_SSID_KEY); 
-         qcloud_nvs_kv_del(STA_PASSWORD_KEY);
+         qcloud_nvs_kv_del("ssid"); 
+         qcloud_nvs_kv_del("psw");
     } else {
         ESP_LOGI(TAG, "quick reboot times %d, don't need to restore", quick_reboot_times);
     }
