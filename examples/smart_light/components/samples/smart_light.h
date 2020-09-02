@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 int smart_light_demo(void);
+int smart_light_demo_test(void);
 
 #if defined(__cplusplus)
 }

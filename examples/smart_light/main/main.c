@@ -31,6 +31,7 @@
 #include "factory_restore.h"
 #include "light.h"
 #include "esp_qcloud_prov.h"
+#include "esp_qcloud_mqtt.h"
 
 #define STA_SSID_KEY             "stassid"
 #define STA_PASSWORD_KEY         "pswd"
@@ -295,9 +296,8 @@ void app_main()
 #endif
     ESP_ERROR_CHECK(esp_qcloud_wifi_start(&wifi_config));
     xTaskCreate(setup_sntp, "setup_sntp", 8196, NULL, 4, NULL); 
-    //mqtt_send_token();
-    smart_light_demo();
-
+   // smart_light_demo();
+    smart_light_demo_test();
 }
 
 

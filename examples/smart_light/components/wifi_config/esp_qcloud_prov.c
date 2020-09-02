@@ -15,6 +15,7 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
+#include "esp_qcloud_mqtt.h"
 static const char *TAG = "esp_qcloud_prov";
 static EventGroupHandle_t g_wifi_event_group;
 
@@ -26,9 +27,9 @@ static EventGroupHandle_t g_wifi_event_group;
 
 
 #define MAX_TOKEN_LENGTH 32
-static char sg_token_str[MAX_TOKEN_LENGTH + 4] = {0};
+char sg_token_str[MAX_TOKEN_LENGTH + 4] = {0};
 
-static bool sg_token_received      = false;
+bool sg_token_received      = false;
 
 typedef struct TokenHandleData {
     bool sub_ready;
@@ -43,6 +44,8 @@ typedef enum {
 } esp_qcloud_prov_event_t;
 
 static EventGroupHandle_t g_wifi_event_group;
+
+void *g_mqtt_client = NULL;
 
 
 
@@ -781,6 +784,7 @@ static int mqtt_send_token(void)
     if (client == NULL) {
         return QCLOUD_ERR_MQTT_NO_CONN;
     } else {
+        g_mqtt_client = client;
         Log_i("Device %s/%s connect success", dev_info.product_id, dev_info.device_name);
         PUSH_LOG("Device %s/%s connect success", dev_info.product_id, dev_info.device_name);
     }
@@ -796,18 +800,14 @@ static int mqtt_send_token(void)
     int retry_cnt = 2;
     do {
         ret = send_token_wait_reply(client, &dev_info, &app_data);
-
         IOT_MQTT_Yield(client, 1000);
     } while (ret && retry_cnt--);
 
-    if (ret)
-        push_error_log(ERR_TOKEN_SEND, ret);
+    //IOT_MQTT_Destroy(&client);
 
-    IOT_MQTT_Destroy(&client);
-
-    // sleep 5 seconds to avoid frequent MQTT connection
+    // sleep 500 ms to avoid frequent MQTT connection
     if (ret == 0)
-        HAL_SleepMs(5000);
+        HAL_SleepMs(500);
 
     return ret;
 }
@@ -830,6 +830,7 @@ esp_err_t esp_qcloud_prov_softap_start(const char *ssid, const char *password, c
 esp_err_t esp_qcloud_send_token(void)
 {
      mqtt_send_token();
+     //esp_qcloud_bind(NULL);
      return ESP_OK;
 }
 
@@ -847,4 +848,9 @@ esp_err_t esp_qcloud_prov_wait(wifi_config_t *sta_cfg, char *token, TickType_t t
 esp_err_t esp_qcloud_prov_softap_stop()
 {
     return ESP_OK;
+}
+
+void *esp_qcloud_mqtt_is_connected(void)
+{
+    return g_mqtt_client;
 }
