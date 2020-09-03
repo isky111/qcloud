@@ -632,8 +632,8 @@ int smart_light_demo(void)
         return rc;
     }
 
-    //construct params
-    void *client = IOT_Template_Construct(&init_params, NULL);
+    //construct params, softap mode have an active connection
+    void *client = IOT_Template_Construct(&init_params, esp_qcloud_mqtt_is_connected());
     if (client == NULL) {
         ESP_LOGE(TAG, "Cloud Device Construct Failed");
         return QCLOUD_ERR_FAILURE;

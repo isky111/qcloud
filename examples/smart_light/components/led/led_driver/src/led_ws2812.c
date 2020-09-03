@@ -100,7 +100,7 @@ esp_err_t ledws2812_deinit(void)
 
 void ledws2812_set_status(bool value, uint16_t hue, uint16_t saturation, uint16_t lightness)
 {
-	ESP_LOGI(TAG, "ledws2812_set_status : %s", value == true ? "true" : "false");
+	//ESP_LOGI(TAG, "ledws2812_set_status : %s", value == true ? "true" : "false");
     if (value == true) {
         uint32_t red = 0;
         uint32_t green = 0;

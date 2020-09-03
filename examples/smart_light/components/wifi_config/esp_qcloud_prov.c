@@ -802,6 +802,7 @@ static int mqtt_send_token(void)
         IOT_MQTT_Yield(client, 1000);
     } while (ret && retry_cnt--);
 
+    //Dnot release the connection 
     //IOT_MQTT_Destroy(&client);
 
     // sleep 500 ms to avoid frequent MQTT connection
@@ -828,19 +829,20 @@ esp_err_t esp_qcloud_prov_softap_start(const char *ssid, const char *password, c
 
 esp_err_t esp_qcloud_send_token(void)
 {
-     mqtt_send_token();
-     //esp_qcloud_bind(NULL);
-     return ESP_OK;
+     return (mqtt_send_token());
 }
 
 esp_err_t esp_qcloud_prov_wait(wifi_config_t *sta_cfg, char *token, TickType_t ticks_wait)
 {
     ESP_LOGI(TAG, "wait prov.....");
-    xEventGroupWaitBits(g_wifi_event_group, QCLOUD_PROV_EVENT_GET_TOKEN | QCLOUD_PROV_EVENT_STA_CONNECTED,
-                        false, true, ticks_wait);
-    ESP_LOGI(TAG, "end prov.....");
-
-    return ESP_OK;
+    EventBits_t uxBits = xEventGroupWaitBits(g_wifi_event_group, QCLOUD_PROV_EVENT_GET_TOKEN | QCLOUD_PROV_EVENT_STA_CONNECTED,
+                         false, true, ticks_wait);
+    if((uxBits & QCLOUD_PROV_EVENT_GET_TOKEN) && (uxBits & QCLOUD_PROV_EVENT_GET_TOKEN) ) {
+        ESP_LOGI(TAG, "end prov ....");  
+        return ESP_OK;
+    }
+    ESP_LOGE(TAG, "wait token and sta connect fail");  
+    return ESP_FAIL;
 }
 
 esp_err_t esp_qcloud_prov_softap_stop()

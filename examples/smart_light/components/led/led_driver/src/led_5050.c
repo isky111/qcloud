@@ -188,7 +188,7 @@ void led5050_deinit(void)
 
 int led5050_set_status(bool value, uint16_t hue, uint16_t saturation, uint16_t lightness)
 {
-    ESP_LOGI(TAG, "led5050_set_status : %s", value == true ? "true" : "false");
+    //ESP_LOGI(TAG, "led5050_set_status : %s", value == true ? "true" : "false");
 
     if (value == true) {
         return (led5050_set_aim_hsv(hue, saturation, lightness));

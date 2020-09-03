@@ -74,34 +74,46 @@ void setup_sntp(void )
     vTaskDelete(NULL);
 }
 
-void light_breathing (void)
+void light_provision_task (void)
 {
-
+    uint16_t hue = 0;
+    while (1) {
+        light_set_status(true, (hue++)%360, 100, 100); 
+        vTaskDelay(5);
+     }
 }
 
 void app_main()
 {
     bool provisioned = false;
+    TaskHandle_t light_task = NULL;
+    int rc;
 
     IOT_Log_Set_Level(eLOG_DEBUG);
-
     ESP_ERROR_CHECK( nvs_flash_init() );
-
     ESP_ERROR_CHECK( factory_restore_init() );
-
     ESP_ERROR_CHECK( light_driver_init() );
-
     ESP_ERROR_CHECK( light_set_status(true, 300, 100, 100) );
-
     ESP_ERROR_CHECK( esp_qcloud_wifi_init() );
 
 #if CONFIG_WIFI_CONFIG_ENABLED
     wifi_config_t wifi_config = { 0 };
     ESP_ERROR_CHECK( esp_qcloud_prov_is_provisioned(&provisioned, &wifi_config) );
     if (!provisioned) {
+        //prompt in the softap mode
+        xTaskCreate((void (*)(void *))light_provision_task, "light_breathing", 2048, NULL, 4, &light_task); 
+        
+        //start softap
         esp_qcloud_prov_softap_start("qcloud_123", NULL, NULL);
-        esp_qcloud_prov_wait(&wifi_config, NULL, portMAX_DELAY);
-        esp_qcloud_send_token();
+        
+        //block max time : 5min 12s = 312s
+        esp_qcloud_prov_wait(&wifi_config, NULL, ( 312*1000 ) / portTICK_PERIOD_MS);
+        esp_qcloud_send_token() ;
+
+        //off task,light up
+        if(light_task != NULL)    
+            vTaskDelete(light_task);
+        ESP_ERROR_CHECK( light_set_status(true, 300, 100, 100) );
     }
 #else
     wifi_config_t wifi_config = {
@@ -111,9 +123,16 @@ void app_main()
         },
     };
 #endif
+
     ESP_ERROR_CHECK(esp_qcloud_wifi_start(&wifi_config));
     xTaskCreate((void (*)(void *))setup_sntp, "setup_sntp", 8196, NULL, 4, NULL); 
-    smart_light_demo();
+    rc = smart_light_demo();
+
+    //if run here,have an unhandled error
+    ESP_LOGE(TAG, "smart light demo quit, resaon: %d", rc);
+    light_driver_deinit();
+    vTaskDelay(1000);
+    esp_restart();
 }
 
 
