@@ -104,11 +104,11 @@ void app_main()
         xTaskCreate((void (*)(void *))light_provision_task, "light_breathing", 2048, NULL, 4, &light_task); 
         
         //start softap
-        esp_qcloud_prov_softap_start("qcloud_123", NULL, NULL);
+        ESP_ERROR_CHECK(esp_qcloud_prov_softap_start("qcloud_123", NULL, NULL));
         
-        //block max time : 5min 12s = 312s
-        esp_qcloud_prov_wait(&wifi_config, NULL, ( 312*1000 ) / portTICK_PERIOD_MS);
-        esp_qcloud_send_token() ;
+        //block max time : 5min 15s = 315s
+        ESP_ERROR_CHECK(esp_qcloud_prov_wait(&wifi_config, NULL, ( 315*1000 ) / portTICK_PERIOD_MS));
+        ESP_ERROR_CHECK(esp_qcloud_send_token());
 
         //off task,light up
         if(light_task != NULL)    
@@ -131,7 +131,8 @@ void app_main()
     //if run here,have an unhandled error
     ESP_LOGE(TAG, "smart light demo quit, resaon: %d", rc);
     light_driver_deinit();
-    vTaskDelay(1000);
+    //delay 1s restart
+    vTaskDelay(( 1000 ) / portTICK_PERIOD_MS);
     esp_restart();
 }
 

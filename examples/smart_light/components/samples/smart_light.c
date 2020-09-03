@@ -179,7 +179,6 @@ static void event_post_cb(void *pClient, MQTTMessage *msg)
 {
     Log_d("recv event reply, clear event");
     IOT_Event_clearFlag(pClient, FLAG_EVENT0);
-    IOT_Event_clearFlag(pClient, FLAG_EVENT1);
 }
 
 // event check and post
@@ -212,7 +211,6 @@ static void eventPostCheck(void *client)
         }
         else
             IOT_Event_clearFlag(client, FLAG_EVENT0);
-             IOT_Event_clearFlag(client, FLAG_EVENT1);
     }
 }
 
@@ -468,11 +466,11 @@ static void deal_down_stream_user_logic(void *client, ProductDataDefine *light)
 {
     /** hardware control **/
     if (light->m_light_switch) {
-        HAL_Printf(" led on %d %d %d", light->m_hue, light->m_saturation, light->m_lightness);
+        ESP_LOGI(TAG, "led on, hue:%d  saturation:%d  lightness:%d", light->m_hue, light->m_saturation, light->m_lightness);
         light_set_status(true, light->m_hue, light->m_saturation, light->m_lightness);
     }
     else {
-        HAL_Printf("led off");
+        ESP_LOGI(TAG, "led off, hue:%d  saturation:%d  lightness:%d", light->m_hue, light->m_saturation, light->m_lightness);
         light_set_status(false, light->m_hue, light->m_saturation, light->m_lightness);
     }
 
@@ -494,7 +492,6 @@ static void deal_down_stream_user_logic(void *client, ProductDataDefine *light)
 
         // switch state changed set EVENT0 flag, the events will be posted by eventPostCheck
         IOT_Event_setFlag(client, FLAG_EVENT0);
-        IOT_Event_setFlag(client, FLAG_EVENT1);
     }
 #endif
 }
