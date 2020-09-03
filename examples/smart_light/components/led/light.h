@@ -66,6 +66,8 @@ esp_err_t light_get_saturation(uint16_t *saturation);
 
 esp_err_t light_update(bool status);
 
+void light_breathing (void); 
+
 
 #ifdef __cplusplus
 }

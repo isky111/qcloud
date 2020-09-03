@@ -32,6 +32,7 @@
 
 #include "wifi_config_internal.h"
 
+
 /* FreeRTOS event group to signal when we are connected & ready to make a request */
 static EventGroupHandle_t sg_wifi_event_group;
 static const int          CONNECTED_BIT          = BIT0;

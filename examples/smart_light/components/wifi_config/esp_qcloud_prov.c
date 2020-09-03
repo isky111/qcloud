@@ -2,7 +2,6 @@
 #include "esp_log.h"
 #include "factory_restore.h"
 #include "qcloud_iot_import.h"
-#include "qcloud_wifi_config.h"
 #include "wifi_config_internal.h"
 #include "qcloud_iot_export_log.h"
 #include "qcloud_iot_export.h"
@@ -15,7 +14,7 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-#include "esp_qcloud_mqtt.h"
+
 static const char *TAG = "esp_qcloud_prov";
 static EventGroupHandle_t g_wifi_event_group;
 
@@ -836,11 +835,10 @@ esp_err_t esp_qcloud_send_token(void)
 
 esp_err_t esp_qcloud_prov_wait(wifi_config_t *sta_cfg, char *token, TickType_t ticks_wait)
 {
-    uint32_t len = 32;
-    ESP_LOGI(TAG, "wait prov");
+    ESP_LOGI(TAG, "wait prov.....");
     xEventGroupWaitBits(g_wifi_event_group, QCLOUD_PROV_EVENT_GET_TOKEN | QCLOUD_PROV_EVENT_STA_CONNECTED,
                         false, true, ticks_wait);
-    ESP_LOGI(TAG, "end prov");
+    ESP_LOGI(TAG, "end prov.....");
 
     return ESP_OK;
 }
